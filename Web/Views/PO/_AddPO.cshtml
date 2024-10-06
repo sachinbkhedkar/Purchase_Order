@@ -1,0 +1,562 @@
+﻿@model Web.Models.PO_Master
+<style>
+    .readonly-select {
+        background-color: #e9ecef; /* Light gray background */
+        pointer-events: none; /* Disable mouse events */
+    }
+
+    .bordered-table {
+        border-collapse: collapse; /* Makes borders look unified */
+        width: 100%; /* Optional: Set the table width */
+    }
+
+        .bordered-table th {
+            border: 1px solid black; /* Set the border for each cell */
+            padding: 8px; /* Optional: Adds padding for better spacing */
+        }
+
+        .bordered-table td {
+            border: 1px solid black; /* Set the border for each cell */
+            padding: 8px; /* Optional: Adds padding for better spacing */
+        }
+
+        .bordered-table tr:nth-child(even) {
+            background-color: #f2f2f2; /* Optional: Alternating row colors */
+        }
+</style>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12" id="myForm">
+                <form  id="addEntityForm">
+
+
+                    <div class="form-group" hidden>
+
+                        <label asp-for="@Model.Order_ID"></label>
+                        <input asp-for="@Model.Order_ID" class="form-control" disabled />
+                        <input asp-for="@Model.Order_ID" class="form-control" hidden />
+                        <span asp-validation-for="@Model.Order_ID" class="text-danger"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="@Model.Order_No">Òrder Number</label>
+                                <input asp-for="@Model.Order_No" class="form-control" disabled />
+                                <input asp-for="@Model.Order_No" class="form-control" hidden />
+                                <span asp-validation-for="Order_No" class="text-danger"></span>
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="@Model.OrderDate"></label>
+                                <input asp-for="@Model.OrderDate" type="date" class="form-control" />
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label asp-for="@Model.Vendor_No">Vendor</label>
+                            <select asp-for="@Model.Vendor_Id" asp-items="@(new SelectList(ViewBag.VendorList, "Id", "Name"))" class="form-control form-control-sm" onchange="OnVendorChange()">
+                                <option value="-1">Select</option>
+                            </select>
+                            <span class="text-danger" id="VendorValidationMessage"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label asp-for="@Model.Notes"></label>
+                            <textarea asp-for="@Model.Notes" class="form-control">
+                                </textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label asp-for="@Model.Oredervalue">Order Value</label>
+                            <input asp-for="@Model.Oredervalue" class="form-control" disabled />
+                            <input asp-for="@Model.Oredervalue" class="form-control" hidden />
+                            <span asp-validation-for="Oredervalue" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <!-- Use col-md-* for responsive columns -->
+                            <div class="form-group">
+                                <label>Material</label>
+                                <select id="Material" asp-items="@(new SelectList(ViewBag.MaterialList, "Id", "Code"))" class="form-control form-control-sm" onchange="OnMaterialChange(this)">
+                                    <option value="-1">Select</option>
+                                </select>
+                                <span class="text-danger" id="MaterialValidationMessage"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Code</label>
+                                <select id="shortText" asp-items="@(new SelectList(ViewBag.MaterialList, "Id", "ShotText"))" class="form-control form-control-sm readonly-select">
+                                    <option value="-1">Select</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Unit</label>
+                                <select id="unit" asp-items="@(new SelectList(ViewBag.MaterialList, "Id", "Unit"))" class="form-control form-control-sm readonly-select">
+                                    <option value="-1">Select</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4" hidden>
+                            <div class="form-group">
+                                <label>Unit</label>
+                                <select id="minOrder" asp-items="@(new SelectList(ViewBag.MaterialList, "Id", "MinOrderQuntity"))" class="form-control form-control-sm readonly-select">
+                                    <option value="-1">Select</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Quntity</label>
+                                <input asp-for="@Model.Quntity" class="form-control" onchange="AmountChange()" />
+                                <span asp-validation-for="Quntity" class="text-danger" id="quantityValidationMessage"></span>
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="@Model.Rate"></label>
+                                <input asp-for="@Model.Rate" class="form-control" onchange="AmountChange()" />
+                                <span asp-validation-for="Rate" class="text-danger"></span>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Amount</label>
+                                <input asp-for="@Model.Amount" class="form-control readonly-select" />
+                                <span asp-validation-for="Amount" class="text-danger"></span>
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label> Expected Date</label>
+                                <input asp-for="@Model.ExpDate" class="form-control" type="date" />
+                                <span asp-validation-for="@Model.ExpDate" class="text-danger"></span>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:9px">
+                        <div class="col-md-4">
+                            <button type="button" id="btnAdd" class="btn btn-primary" onclick="addLine()">Add Line</button>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" id="btnUpdate" class="btn btn-warning" onclick="updateLine()">Update Line</button>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" id="btnRemove" class="btn btn-danger" onclick="RemoveLine()">Remove Line</button>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:9px">
+                        <table class="bordered-table">
+                            <thead>
+                                <tr>
+                                    <th hidden></th>
+                                    <th>Select</th>
+                                    <th>Code</th>
+                                    <th>Quantity</th>
+                                    <th>Rate</th>
+                                    <th>Amount</th>
+                                    <th>Exp Date</th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="lineItemsTableBody">
+                                <!-- Example of how a line item might be rendered -->
+                                <!-- You can loop through a collection here if applicable -->
+                                <!-- Add more rows as necessary -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @*        <div class="form-group">
+                    <label asp-for="@Model.AddressLine2"></label>
+                    <input asp-for="@Model.AddressLine2" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                    <label asp-for="@Model.Email"></label>
+                    <input asp-for="@Model.Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                    <label asp-for="@Model.Phone"></label>
+                    <input asp-for="@Model.Phone" class="form-control" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                    <label asp-for="@Model.Valid"></label>
+                    <input asp-for="@Model.Valid" type="date" class="form-control" />
+                    </div> *@
+                    @*  <div class="form-group form-check">
+                    <input asp-for="@Model.IsActive" class="form-check-input" type="checkbox" />
+                    <label asp-for="@Model.IsActive" class="form-check-label">Is Active</label>
+                    </div> *@
+
+                    <button type="button" onclick="SaveData()" class="btn btn-primary" style="margin-top:9px">Add </button>
+                    <button type="button" class="btn btn-secondary close" data-bs-dismiss="modal" style="margin-top:9px">Cancel</button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    $(function () {
+        // $("#expDate").datetimepicker({
+        //     format: 'DD-MMM-YYYY HH:mm',
+        //     defaultDate: moment(), // Set to current date and time
+        //     maxDate: '09-SEP-2024 12:00', // Max date
+        //     minDate: moment(),
+        //     useCurrent: true,
+
+        // });
+        $("#btnUpdate").prop("disabled", true);
+        $("#btnRemove").prop("disabled", true);
+        const today = new Date().toISOString().split('T')[0]; // Format: yyyy-mm-dd
+        document.getElementById("ExpDate").setAttribute('min', today);
+        document.getElementById("OrderDate").setAttribute('max', today);
+
+    })
+
+
+    function OnMaterialChange(e) {
+        //debugger;
+        if ($("#Vendor_Id").val() === '-1') {
+            $("#VendorValidationMessage").text("This filed is required.");
+            $("#Material").val(-1);
+        }
+
+        var id = $("#Material").val();
+        $("#MaterialValidationMessage").text("");
+        $("#shortText").val(id);
+        $("#unit").val(id);
+        $("#minOrder").val(id);
+
+    }
+
+    function OnVendorChange() {
+        $("#VendorValidationMessage").text("");
+    }
+
+
+    function AmountChange() {
+        if ($("#Material").val() === '-1') {
+            $("#MaterialValidationMessage").text("This filed is required.");
+            $("#Quntity").val(0);
+            return;
+        }
+
+        debugger;
+        $("#Amount").val(0);
+        var min = $("#minOrder option:selected").text();
+        if ($("#Quntity").val() < parseInt(min)) {
+
+            $("#quantityValidationMessage").text("value should be grater than mimimum order quntity of material.")
+            return;
+        }
+        $("#quantityValidationMessage").text("");
+        $("#Amount").val($("#Quntity").val() * $("#Rate").val());
+    }
+
+    function addLine() {
+
+        if ($("#Material").val() === '-1') {
+            alert("No date present....");
+            return;
+        }
+
+        if ($("#ExpDate").val() < formatDate(new Date())) {
+
+        }
+        var Isduplicate = false;
+        const rows = document.querySelectorAll('#lineItemsTableBody tr');
+        for (i = 0; i < rows.length; i++) {
+            if (rows[i].cells[1].innerText == $("#Material").text()) {
+                Isduplicate = true;
+                break;
+            }
+        }
+
+        if (Isduplicate) {
+            alert("material Aready Added.");
+            return;
+        }
+        const tableBody = document.getElementById('lineItemsTableBody');
+        const newRow = document.createElement('tr');
+
+        // Create new cells
+        newRow.innerHTML = `
+                <td hidden></td>
+                    <td><input type="checkbox" class="select-checkbox" value="`+ $("#Material").val() + `" onclick="onChechboxClick(this)"></td>
+                    <td>`+ $("#Material option:selected").text() + `</td>
+                    <td>`+ $("#Quntity").val() + `</td>
+                    <td>`+ $("#Rate").val() + `</td>
+                    <td>`+ $("#Amount").val() + `</td>
+                    <td>`+ $("#ExpDate").val() + `</td>
+            `;
+
+        tableBody.appendChild(newRow);
+        var SelectValue = $("#Material").val();
+        $("#Oredervalue").val(0);
+        $("#Amount").val(0);
+        $("#shortText").val(-1);
+        $("#unit").val(-1);
+        $("#minOrder").val(-1);
+        $("#Material").val(-1);
+        $("#Rate").val(0);
+        $("#Quntity").val(0);
+        const today = new Date().toISOString().split('T')[0];
+        $("#ExpDate").val(today);
+        debugger;
+        var materialDropdown = $("#Material option");
+        materialDropdown.each(function () {
+            // Hide specific options (e.g., Material 2)
+            if ($(this).val() === SelectValue) {
+                $(this).hide();
+            } else {
+              //  $(this).show(); // Show other options
+            }
+        });
+        const tableBodys = document.getElementById('lineItemsTableBody');
+        const rowss = tableBodys.querySelectorAll('tr');
+        var ordervalue = 0
+        rowss.forEach(row => {
+            // Access each <td> in the row
+            var matModel = new Object();
+            const cells = row.querySelectorAll('td');
+            const tdValues = Array.from(cells).map(cell => cell.textContent.trim());
+
+            ordervalue += parseFloat(tdValues[5]);
+
+        });
+        $("#Oredervalue").val(ordervalue);
+
+
+    }
+    function onChechboxClick(e){
+        const checkboxes = document.querySelectorAll('.select-checkbox');
+
+        // Uncheck all other checkboxes
+        checkboxes.forEach((cb) => {
+            if (cb !== e) {
+                cb.checked = false; // Uncheck other checkboxes
+            }
+        });
+        debugger;
+        if (e.checked) {
+            $("#btnAdd").prop("disabled", true);
+            $("#btnUpdate").prop("disabled", false);
+            $("#btnRemove").prop("disabled", false);
+            var materialDropdown = $("#Material option");
+            materialDropdown.each(function () {
+                // Hide specific options (e.g., Material 2)
+                if ($(this).val() === e.value) {
+                    $(this).show();
+                    $("#Material").val(e.value);
+                    $("#shortText").val(e.value);
+                    $("#unit").val(e.value);
+                    $("#minOrder").val(e.value);
+
+                } else {
+                    //  $(this).show(); // Show other options
+                }
+            });
+
+            checkboxes.forEach((checkbox, index) => {
+                if (checkbox.checked) {
+                    var tr = checkbox.closest('tr');
+                    var tdValues = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim());
+                    $("#Rate").val(tdValues[3]);
+                    $("#Quntity").val(tdValues[4]);
+                    $("#Amount").val(tdValues[5]);
+                    $("#ExpDate").val(tdValues[6]);
+                    
+                    //$("#Oredervalue").val(parseFloat($("#Oredervalue").val()) - parseFloat($("#Amount").val()));
+                }
+            });
+        } else {
+            $("#btnAdd").prop("disabled", false);
+            $("#btnUpdate").prop("disabled", true);
+            $("#btnRemove").prop("disabled", true);
+          //  $("#Oredervalue").val(parseFloat($("#Oredervalue").val()) + parseFloat($("#Amount").val()));
+            $("#Amount").val(0);
+            $("#shortText").val(-1);
+            $("#unit").val(-1);
+            $("#minOrder").val(-1);
+            $("#Material").val(-1);
+            $("#Rate").val(0);
+            $("#Quntity").val(0);
+            const today = new Date().toISOString().split('T')[0];
+            $("#ExpDate").val(today);
+            debugger;
+            var materialDropdown = $("#Material option");
+            materialDropdown.each(function () {
+                // Hide specific options (e.g., Material 2)
+                if ($(this).val() === e.value) {
+                    $(this).hide();
+                } else {
+                    //  $(this).show(); // Show other options
+                }
+            });
+        }
+        
+       // const checkboxes = document.querySelectorAll('.select-checkbox');
+     
+      
+    }
+    function RemoveLine() {
+        $("#btnAdd").prop("disabled", false);
+        const checkboxes = document.querySelectorAll('.select-checkbox');
+        checkboxes.forEach((checkbox, index) => {
+            if (checkbox.checked) {
+                checkbox.closest('tr').remove();
+            }
+        });
+        $("#Oredervalue").val(0);
+        const tableBodys = document.getElementById('lineItemsTableBody');
+        const rowss = tableBodys.querySelectorAll('tr');
+        var ordervalue = 0
+        rowss.forEach(row => {
+            // Access each <td> in the row
+            var matModel = new Object();
+            const cells = row.querySelectorAll('td');
+            const tdValues = Array.from(cells).map(cell => cell.textContent.trim());
+
+            ordervalue += parseFloat(tdValues[5]);
+
+        });
+        $("#Oredervalue").val(ordervalue);
+    }
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+    function updateLine(){
+        $("#btnAdd").prop("disabled", false);
+        const checkboxes = document.querySelectorAll('.select-checkbox');
+        checkboxes.forEach((checkbox) => {
+            if (checkbox.checked) {
+                debugger
+                const tr = checkbox.closest('tr');
+                const tdElements = tr.querySelectorAll('td');
+
+                tdElements[2].textContent = $("#Material option:selected").text();
+                tdElements[3].textContent = $("#Quntity").val();
+                tdElements[4].textContent = $("#Rate").val();
+                tdElements[5].textContent = $("#Amount").val();
+                tdElements[6].textContent = $("#ExpDate").val();
+                checkbox.value = $("#Material").val();
+                checkbox.checked = false;
+                //
+
+                var SelectValue = $("#Material").val();
+                $("#Oredervalue").val(0);
+                $("#Amount").val(0);
+                $("#shortText").val(-1);
+                $("#unit").val(-1);
+                $("#minOrder").val(-1);
+                $("#Material").val(-1);
+                $("#Rate").val(0);
+                $("#Quntity").val(0);
+                const today = new Date().toISOString().split('T')[0];
+                $("#ExpDate").val(today);
+                debugger;
+                var materialDropdown = $("#Material option");
+                materialDropdown.each(function () {
+                    // Hide specific options (e.g., Material 2)
+                    if ($(this).val() === SelectValue) {
+                        $(this).hide();
+                    } else {
+                        //  $(this).show(); // Show other options
+                    }
+                });
+                // Example: Update each <td> with a new value
+               // tdElements.forEach((td, index) => {
+                   // td.textContent = `New Value ${index + 1}`; // Replace with your desired value
+
+                //});
+            }
+        });
+
+
+
+        const tableBodys = document.getElementById('lineItemsTableBody');
+        const rowss = tableBodys.querySelectorAll('tr');
+        var ordervalue=0
+        rowss.forEach(row => {
+            // Access each <td> in the row
+            var matModel = new Object();
+            const cells = row.querySelectorAll('td');
+            const tdValues = Array.from(cells).map(cell => cell.textContent.trim());
+
+            ordervalue+= parseFloat(tdValues[5]);
+       
+        });
+        $("#Oredervalue").val(ordervalue);
+
+    }
+
+    function SaveData() {
+        debugger;
+        var model = new Object();
+        model.Order_ID = $("#Order_ID").val();
+        model.Order_No = $("#Order_No").val();
+        model.Order_ID = $("#Order_ID").val();
+        model.OrderDate = $("#OrderDate").val();
+        model.Notes = $("#Notes").val();
+        model.Oredervalue = $("#Oredervalue").val();
+        model.Vendor_Id = $("#Vendor_Id").val();
+
+        // Access Table Data
+        const tableBody = document.getElementById('lineItemsTableBody');
+        const rows = tableBody.querySelectorAll('tr');
+        var ListMaterial = [];
+        rows.forEach(row => {
+            // Access each <td> in the row
+            var matModel = new Object();
+                const cells = row.querySelectorAll('td');
+            const tdValues = Array.from(cells).map(cell => cell.textContent.trim());
+            matModel.Code = tdValues[2];
+            matModel.Rate = parseFloat(tdValues[3]); 
+            matModel.Quntity = parseFloat(tdValues[4]);
+            matModel.Amount = parseFloat(tdValues[5]);
+            matModel.ExpDate=tdValues[6];
+            ListMaterial.push(matModel);
+        });
+
+
+        $.ajax({
+            url:'../PO/SavePO',
+            type:'post',
+            data: {
+                model: model,
+                MaterialList: JSON.stringify(ListMaterial)
+            }
+
+
+        });
+
+    }
+
+</script>

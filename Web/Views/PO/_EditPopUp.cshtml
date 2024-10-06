@@ -1,0 +1,87 @@
+﻿@model Web.Models.PO_Master
+
+<style>
+    /* Apply border to table, table rows, and table cells */
+    #myTableMat {
+        border-collapse: collapse; /* Ensures borders do not double up */
+        width: 100%;
+    }
+
+        #myTableMat th, #myTableMat td {
+            border: 1px solid black; /* Border style for table cells */
+            padding: 8px; /* Optional: adds space inside the cells */
+            text-align: left; /* Align text to the left (optional) */
+        }
+
+        #myTableMat th {
+            background-color: #f2f2f2; /* Optional: background color for headers */
+        }
+</style>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12" id="myForm">
+                <form asp-action="Edit" asp-controller="MaterialMaster" method="post" id="addEntityForm">
+                    <div class="form-group" hidden>
+                        <label asp-for="@Model.Order_ID"></label>
+                        <input asp-for="@Model.Order_ID" class="form-control" />
+                        <span asp-validation-for="Order_ID" class="text-danger"></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div style="margin-top:1em">
+    <table id="myTableMat" border="1" style="width:100%">
+        <thead>
+            <tr>
+                <th hidden>Id</th>
+                <th>Mateerial Code</th>
+                <th>Quntity</th>
+                <th>Rate</th>
+                <th>Amount</th>
+                <th>Expected Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        $.ajax({
+            url: '../PO/GetMaterialList?ID=' + $("#Order_ID").val(),
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+
+                $('#myTableMat tbody').empty();
+
+
+                $.each(data, function (index, item) {
+                   
+                    $.each(item.materialList, function (materialIndex, material) {
+                        $('#myTableMat tbody').append(
+                            '<tr class="material-detail">' +
+                            '<td hidden></td>' + // Hidden cell for alignment, can adjust as needed
+                            '<td>' + material.code + '</td>' + // Merge columns for material details
+                            '<td>' + material.quntity + '</td>' + // Quantity
+                            '<td>' + material.rate + '</td>' + // Quantity
+                            '<td>' + material.amount + '</td>' + // Quantity
+                            '<td>' + material.expDate + '</td>' + // Quantity
+                            // '<td colspan="2"></td>' + // Empty columns for action buttons or other data
+                            '</tr>'
+                        );
+                    });
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error: ' + status + error);
+            }
+        });
+    });
+</script>
